@@ -1,0 +1,115 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  cars          Car[]
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Car {
+  id               String   @id @default(cuid())
+  make            String
+  model           String
+  year            Int
+  price           Float
+  mileage         Int
+  description     String?
+  images          CarImage[]
+  seller          User     @relation(fields: [sellerId], references: [id])
+  sellerId        String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Basic Information
+  bodyType        String
+  doors           Int
+  seats           Int
+  color           String
+  firstRegistration DateTime
+
+  // Technical Details
+  power           Int     // in kW
+  displacement    Int     // in cc
+  fuelType        String
+  transmission    String
+  drive           String
+
+  // Performance
+  acceleration    Float?  // 0-100 km/h in seconds
+  topSpeed        Int?    // in km/h
+  fuelConsumptionCombined Float?  // L/100km
+  fuelConsumptionUrban Float?
+  fuelConsumptionExtraUrban Float?
+  co2Emissions    Int?    // g/km
+
+  // Condition
+  previousOwners  Int     @default(1)
+  hasWarranty     Boolean @default(false)
+  hasServiceHistory Boolean @default(false)
+
+  @@index([make, model])
+  @@index([price])
+  @@index([mileage])
+}
+
+model CarImage {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String?
+  order     Int      @default(0)
+  car       Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+  carId     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([carId])
+}
