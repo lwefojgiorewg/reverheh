@@ -1,7 +1,6 @@
-import { PrismaAdapter } from '@auth/prisma-adapter';
-import { NextAuthOptions } from 'next-auth';
-import NextAuth from 'next-auth/next';
+import NextAuth, { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
+import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
 
 export const authOptions: NextAuthOptions = {
@@ -17,7 +16,7 @@ export const authOptions: NextAuthOptions = {
     error: '/auth/error',
   },
   callbacks: {
-    session: async ({ session, user }) => {
+    async session({ session, user }) {
       if (session?.user) {
         session.user.id = user.id;
       }
@@ -27,4 +26,4 @@ export const authOptions: NextAuthOptions = {
 };
 
 const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST }; 
+export { handler as GET, handler as POST };
