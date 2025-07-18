@@ -15,15 +15,18 @@ const authOptions = {
     signIn: '/auth/signin',
     error: '/auth/error',
   },
-  callbacks: {
-    async session({ session, user }) {
-      if (session?.user) {
-        session.user.id = user.id;
-      }
-      return session;
-    },
+  import { Session } from "next-auth";
+import { JWT } from "next-auth/jwt";
+
+callbacks: {
+  async session({ session, token }: { session: Session; token: JWT }) {
+    if (session?.user) {
+      session.user.id = token.sub!;
+    }
+    return session;
   },
-};
+}
+
 
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
